@@ -112,8 +112,6 @@ public class Dictionary<K, V> implements DictionaryADT<K, V> {
 
     /**
      * Checks whether the dictionary is empty.
-     * Precondition: None.
-     * Postcondition: Returns true if dictionary is empty, false otherwise.
      */
     @Override
     public boolean isEmpty() {
@@ -122,8 +120,6 @@ public class Dictionary<K, V> implements DictionaryADT<K, V> {
 
     /**
      * Returns the number of key-value pairs in the dictionary.
-     * Precondition: None.
-     * Postcondition: Returns the count of stored key-value pairs.
      */
     @Override
     public int size() {
