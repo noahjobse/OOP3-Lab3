@@ -3,126 +3,144 @@ package implementations;
 import java.util.ArrayList;
 import utilities.DictionaryADT;
 import exceptions.DuplicateKeyException;
-import exceptions.KeyNotFoundException;
 
+/**
+ * Implementation of the DictionaryADT using ArrayLists to store key-value pairs.
+ * Keys must be unique.
+ *
+ * @param <K> the type of keys maintained by this dictionary
+ * @param <V> the type of values associated with the keys
+ */
 public class Dictionary<K, V> implements DictionaryADT<K, V> {
-    // Constants
+    // Constant for the default size.
     private static final int DEFAULT_SIZE = 10;
-
-    // Index indicates pairing, e.g., keys[1] is stored at values[1]
+    
+    // The lists that store keys and values, where the index in one list corresponds to the same index in the other.
     private ArrayList<K> keys;
     private ArrayList<V> values;
-
+    
     /**
-     * Default constructor initializes empty ArrayLists for keys and values.
-     * Precondition: None.
-     * Postcondition: An empty dictionary is created.
+     * Default constructor that creates a Dictionary with a default size.
      */
     public Dictionary() {
-        this.keys = new ArrayList<>();
-        this.values = new ArrayList<>();
+        create(DEFAULT_SIZE);
     }
-
+    
     /**
-     * Constructor with initial size.
-     * Precondition: size should be non-negative.
-     * Postcondition: A dictionary with a predefined initial capacity is created.
+     * Constructor that creates a Dictionary with a specified initial size.
+     * 
+     * @param size the initial capacity for the dictionary.
      */
     public Dictionary(int size) {
-        this.keys = new ArrayList<>(size);
-        this.values = new ArrayList<>(size);
+        create(size);
     }
-
+    
     /**
-     * Inserts a new key-value pair into the dictionary.
-     * Precondition: key must not be null and must be unique.
-     * Postcondition: Key-value pair is stored in the dictionary.
-     * @throws DuplicateKeyException if key already exists.
-     * @throws IllegalArgumentException if key is null.
+     * Initializes the dictionary's internal storage with the specified size.
+     * <p>
+     * <b>Precondition:</b> None.<br>
+     * <b>Postcondition:</b> The keys and values ArrayLists are initialized with the given size. 
+     * If the provided size is less than or equal to 0, the default size is used.
+     * </p>
+     * 
+     * @param size the initial capacity of the dictionary.
      */
     @Override
-    public void insert(K key, V value) throws DuplicateKeyException {
-        if (key == null) {
-            throw new IllegalArgumentException("Key cannot be null");
+    public void create(int size) {
+        if (size <= 0) {
+            size = DEFAULT_SIZE;
+        }
+        keys = new ArrayList<>(size);
+        values = new ArrayList<>(size);
+    }
+    
+    /**
+     * Inserts a new key-value pair into the dictionary.
+     * <p>
+     * <b>Precondition:</b> Both key and value are not null.<br>
+     * <b>Postcondition:</b> The key-value pair is added if the key does not exist. 
+     * If the key is already present, a DuplicateKeyException is thrown.
+     * </p>
+     * 
+     * @param key the key to be inserted.
+     * @param value the value to be associated with the key.
+     * @return true if the key-value pair is successfully inserted.
+     * @throws DuplicateKeyException if the key already exists in the dictionary.
+     */
+    @Override
+    public boolean insert(K key, V value) throws DuplicateKeyException {
+        if (key == null || value == null) {
+            throw new IllegalArgumentException("Key and value must not be null.");
         }
         if (keys.contains(key)) {
-            throw new DuplicateKeyException("Key already exists in the dictionary");
+            throw new DuplicateKeyException("Duplicate key: " + key);
         }
         keys.add(key);
         values.add(value);
+        return true;
     }
-
+    
     /**
-     * Removes a key-value pair from the dictionary.
-     * Precondition: key must exist in the dictionary.
-     * Postcondition: Key and associated value are removed.
-     * @throws KeyNotFoundException if key is not found.
-     * @throws IllegalArgumentException if key is null.
+     * Removes the key-value pair associated with the given key from the dictionary.
+     * <p>
+     * <b>Precondition:</b> The key is not null.<br>
+     * <b>Postcondition:</b> If the key exists, its associated key-value pair is removed and 
+     * its value is returned; if not, the method returns null.
+     * </p>
+     * 
+     * @param key the key whose associated pair is to be removed.
+     * @return the value associated with the removed key, or null if the key was not found.
      */
     @Override
-    public V remove(K key) throws KeyNotFoundException {
-        if (key == null) {
-            throw new IllegalArgumentException("Key cannot be null");
-        }
+    public V remove(K key) {
         int index = keys.indexOf(key);
         if (index == -1) {
-            throw new KeyNotFoundException("Key not found in the dictionary");
+            return null;
         }
+        V removedValue = values.get(index);
         keys.remove(index);
-        return values.remove(index);
+        values.remove(index);
+        return removedValue;
     }
-
+    
     /**
-     * Updates the value associated with an existing key.
-     * Precondition: key must exist in the dictionary.
-     * Postcondition: Value for the key is updated.
-     * @throws KeyNotFoundException if key is not found.
-     * @throws IllegalArgumentException if key is null.
+     * Updates the value associated with the specified key.
+     * <p>
+     * <b>Precondition:</b> Both key and new value are not null.<br>
+     * <b>Postcondition:</b> If the key exists, its value is updated to the new value and the method returns true.
+     * If the key does not exist, the dictionary remains unchanged and the method returns false.
+     * </p>
+     * 
+     * @param key the key whose value is to be updated.
+     * @param value the new value to associate with the key.
+     * @return true if the update is successful, or false if the key does not exist.
      */
     @Override
-    public void update(K key, V value) throws KeyNotFoundException {
-        if (key == null) {
-            throw new IllegalArgumentException("Key cannot be null");
-        }
+    public boolean update(K key, V value) {
         int index = keys.indexOf(key);
         if (index == -1) {
-            throw new KeyNotFoundException("Key not found in the dictionary");
+            return false;
         }
         values.set(index, value);
+        return true;
     }
-
+    
     /**
-     * Retrieves the value associated with a given key.
-     * Precondition: key must exist in the dictionary.
-     * Postcondition: Value associated with key is returned.
-     * @throws KeyNotFoundException if key is not found.
-     * @throws IllegalArgumentException if key is null.
+     * Retrieves the value associated with the specified key from the dictionary.
+     * <p>
+     * <b>Precondition:</b> The key is not null.<br>
+     * <b>Postcondition:</b> Returns the value associated with the key if found; otherwise, returns null.
+     * </p>
+     * 
+     * @param key the key whose value is to be looked up.
+     * @return the value associated with the key, or null if the key does not exist.
      */
     @Override
-    public V lookup(K key) throws KeyNotFoundException {
-        if (key == null) {
-            throw new IllegalArgumentException("Key cannot be null");
-        }
+    public V lookup(K key) {
         int index = keys.indexOf(key);
         if (index == -1) {
-            throw new KeyNotFoundException("Key not found in the dictionary");
+            return null;
         }
         return values.get(index);
-    }
-
-    /**
-     * Checks whether the dictionary is empty.
-     */
-    @Override
-    public boolean isEmpty() {
-        return keys.isEmpty();
-    }
-
-    /**
-     * Returns the number of key-value pairs in the dictionary.
-     */
-    @Override
-    public int size() {
-        return keys.size();
     }
 }
